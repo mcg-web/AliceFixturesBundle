@@ -35,7 +35,6 @@ class Configuration implements ConfigurationInterface
                 ->beforeNormalization()
                     ->ifTrue(function ($v) { return is_array($v) && !array_key_exists('managers', $v) && !array_key_exists('manager', $v); })
                     ->then(function ($v) {
-                var_dump($v);
                         // Key that should not be rewritten to the manager config
                         $excludedKeys = array('default_manager' => true);
                         $manager = array();

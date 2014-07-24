@@ -82,6 +82,31 @@ h4cc_alice_fixtures:
     doctrine: orm                               # default
 ```
 
+Or you can use many managers:
+
+```yaml
+# app/config/config_dev.yml
+
+h4cc_alice_fixtures:
+    managers:
+        orm:
+            locale: en_US                               # default
+            seed: 1                                     # default
+            do_flush: true                              # default
+
+            object_manager: null                        # default
+            schema_tool: null                           # default
+            doctrine: orm                               # default
+        mongodb:
+            locale: en_US
+            seed: 1
+            do_flush: true
+
+            object_manager: null
+            schema_tool: null
+            doctrine: mongodb-odm
+```
+
 Check out this command for a always up-to-date configuration reference:
 ```
 $ php app/console config:dump-reference h4cc_alice_fixtures
@@ -153,7 +178,7 @@ h4cc_alice_fixtures
 
 Example for loading single files using all available options:
 ```bash
-$ php app/console h4cc_alice_fixtures:load:files --type=yaml --seed=42 --local=de_DE --no-persist --drop src/Acme/DemoBundle/Fixtures/Users.yml src/Acme/DemoBundle/Fixtures/Articles.yml
+$ php app/console h4cc_alice_fixtures:load:files --manager=default --type=yaml --seed=42 --local=de_DE --no-persist --drop src/Acme/DemoBundle/Fixtures/Users.yml src/Acme/DemoBundle/Fixtures/Articles.yml
 ```
 
 Example command for loading the given FixtureSet:
