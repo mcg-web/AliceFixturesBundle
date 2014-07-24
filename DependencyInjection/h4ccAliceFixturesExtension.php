@@ -51,7 +51,7 @@ class h4ccAliceFixturesExtension extends Extension
         }
 
         foreach($config['managers'] as $name => $currentManagerConfig) {
-            if(!in_array($currentManagerConfig['doctrine'], ['orm', 'mongodb-odm'])) {
+            if(!in_array($currentManagerConfig['doctrine'], array('orm', 'mongodb-odm'))) {
                 throw new \InvalidArgumentException("Invalid value for 'doctrine'");
             }
 
