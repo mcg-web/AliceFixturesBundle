@@ -54,13 +54,25 @@ class LoadFilesCommand extends ContainerAwareCommand
             }
         }
 
+        $managerServiceId = 'h4cc_alice_fixtures.manager';
+
+        if($input->getOption('manager') != 'default') {
+            $managerServiceId = sprintf('h4cc_alice_fixtures.%s_manager', $input->getOption('manager'));
+        }
+
         /**
          * @var $manager \h4cc\AliceFixturesBundle\Fixtures\FixtureManager
          */
-        $manager = $this->getContainer()->get(sprintf('h4cc_alice_fixtures.%s_manager', $input->getOption('manager')));
+        $manager = $this->getContainer()->get($managerServiceId);
+
+        $schemaToolServiceId = 'h4cc_alice_fixtures.orm.schema_tool';
+
+        if($input->getOption('manager') != 'default') {
+            $schemaToolServiceId = sprintf('h4cc_alice_fixtures.orm.%s_schema_tool', $input->getOption('manager'));
+        }
 
         if ($input->getOption('drop')) {
-            $schemaTool = $this->getContainer()->get(sprintf('h4cc_alice_fixtures.schema_tool_%s', $input->getOption('manager')));
+            $schemaTool = $this->getContainer()->get($schemaToolServiceId);
             $schemaTool->dropSchema();
             $schemaTool->createSchema();
         }

@@ -54,10 +54,16 @@ class LoadSetsCommand extends ContainerAwareCommand
             }
         }
 
+        $managerServiceId = 'h4cc_alice_fixtures.manager';
+
+        if($input->getOption('manager') != 'default') {
+            $managerServiceId = sprintf('h4cc_alice_fixtures.%s_manager', $input->getOption('manager'));
+        }
+
         /**
          * @var $manager \h4cc\AliceFixturesBundle\Fixtures\FixtureManager
          */
-        $manager = $this->getContainer()->get(sprintf('h4cc_alice_fixtures.%s_manager', $input->getOption('manager')));
+        $manager = $this->getContainer()->get($managerServiceId);
 
         foreach ($sets as $file) {
             $output->write("Loading file '$file' ... ");

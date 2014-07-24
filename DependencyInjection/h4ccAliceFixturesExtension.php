@@ -25,6 +25,10 @@ use Symfony\Component\DependencyInjection\Loader;
  */
 class h4ccAliceFixturesExtension extends Extension
 {
+    const FIXTURE_MANAGER_NAME_MODEL = 'h4cc_alice_fixtures.%s_manager';
+    const SCHEMA_TOOL_NAME_MODEL     = 'h4cc_alice_fixtures.orm.%s_schema_tool';
+    const OBJECT_MANAGER_NAME_MODEL  = 'h4cc_alice_fixtures.object_manager.%s';
+
     /**
      * {@inheritDoc}
      */
@@ -61,32 +65,47 @@ class h4ccAliceFixturesExtension extends Extension
 
             $managerServiceDefinition = new Definition();
             $managerServiceDefinition->setClass('%h4cc_alice_fixtures.manager.class%');
-            $managerServiceDefinition->setArguments([
+            $managerServiceDefinition->setArguments(array(
                 $managerConfig,
                 new Reference($this->getObjectManagerServiceIdForCurrentConfig($currentManagerConfig, $container)),
                 new Reference('h4cc_alice_fixtures.loader.factory'),
                 new Reference($schemaToolServiceId)
-            ]);
+            ));
+
             // set manager
-            $container->setDefinition(sprintf('h4cc_alice_fixtures.%s_manager', $name), $managerServiceDefinition);
+            $container->setDefinition(sprintf(static::FIXTURE_MANAGER_NAME_MODEL, $name), $managerServiceDefinition);
 
             // set a alias schema tool service to ease find by manager name
-            $container->setAlias(sprintf('h4cc_alice_fixtures.schema_tool_%s', $name), $schemaToolServiceId);
+            $container->setAlias(sprintf(static::SCHEMA_TOOL_NAME_MODEL, $name), $schemaToolServiceId);
         }
-        // set default alias manager
-        $container->setAlias('h4cc_alice_fixtures.manager', sprintf('h4cc_alice_fixtures.%s_manager', $config['default_manager']));
+
+        $defaultManagerConfig = $config['managers'][$config['default_manager']];
+
+        // set default alias fixture manager
+        $container->setAlias(
+            'h4cc_alice_fixtures.manager',
+            sprintf(static::FIXTURE_MANAGER_NAME_MODEL, $config['default_manager'])
+        );
+
+        // set default alias schema tool
+        $container->setAlias(
+            'h4cc_alice_fixtures.orm.schema_tool',
+            $this->getSchemaToolServiceIdForCurrentConfig($defaultManagerConfig, $container)
+        );
+
+        //set default alias object manager
+        $container->setAlias(
+            'h4cc_alice_fixtures.object_manager',
+            $this->getObjectManagerServiceIdForCurrentConfig($defaultManagerConfig, $container)
+        );
     }
 
     private function getObjectManagerServiceIdForCurrentConfig(array $currentManagerConfig, ContainerBuilder $container)
     {
-        if(isset($currentManagerConfig['object_manager'])) {
+        if(!empty($currentManagerConfig['object_manager'])) {
             $serviceId = $currentManagerConfig['object_manager'];
         } else {
-            $serviceId = sprintf('h4cc_alice_fixtures.object_manager.%s', $this->getCleanDoctrineConfigName($currentManagerConfig['doctrine']));
-
-            if (!$container->has($serviceId)) {
-                $container->setAlias($serviceId, $this->getDefaultManagerServiceId($currentManagerConfig['doctrine']));
-            }
+            $serviceId = $this->getDefaultManagerServiceId($currentManagerConfig['doctrine']);
         }
 
         return $serviceId;
@@ -94,15 +113,19 @@ class h4ccAliceFixturesExtension extends Extension
 
     private function getSchemaToolServiceIdForCurrentConfig(array $currentManagerConfig, ContainerBuilder $container)
     {
-        $serviceId = sprintf('h4cc_alice_fixtures.schema_tool.%s', $this->getCleanDoctrineConfigName($currentManagerConfig['doctrine']));
+        if(!empty($currentManagerConfig['schema_tool'])) {
+            $serviceId = $currentManagerConfig['schema_tool'];
+        } else {
+            $serviceId = sprintf('h4cc_alice_fixtures.orm.schema_tool.%s', $this->getCleanDoctrineConfigName($currentManagerConfig['doctrine']));
 
-        if (!$container->has($serviceId)) {
-            $schemaToolDefinition = new Definition();
-            $schemaToolDefinition->setClass($this->getSchemaToolClass($currentManagerConfig['doctrine']));
-            $schemaToolDefinition->setArguments([
-                new Reference($this->getObjectManagerServiceIdForCurrentConfig($currentManagerConfig, $container))
-            ]);
-            $container->setDefinition($serviceId, $schemaToolDefinition);
+            if (!$container->has($serviceId)) {
+                $schemaToolDefinition = new Definition();
+                $schemaToolDefinition->setClass($this->getSchemaToolClass($currentManagerConfig['doctrine']));
+                $schemaToolDefinition->setArguments(array(
+                    new Reference($this->getObjectManagerServiceIdForCurrentConfig($currentManagerConfig, $container))
+                ));
+                $container->setDefinition($serviceId, $schemaToolDefinition);
+            }
         }
 
         return $serviceId;
@@ -146,10 +169,10 @@ class h4ccAliceFixturesExtension extends Extension
 
         switch($doctrineConfigName) {
             case 'orm':
-                $cleanDoctrineConfigName = 'orm';
+                $cleanDoctrineConfigName = 'doctrine';
                 break;
             case 'mongodb-odm':
-                $cleanDoctrineConfigName = 'mongodb_odm';
+                $cleanDoctrineConfigName = 'mongodb';
                 break;
         }
 
