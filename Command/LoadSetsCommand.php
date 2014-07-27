@@ -56,7 +56,7 @@ class LoadSetsCommand extends ContainerAwareCommand
 
         $managerServiceId = 'h4cc_alice_fixtures.manager';
 
-        if($input->getOption('manager') != 'default') {
+        if ('default' !== $input->getOption('manager')) {
             $managerServiceId = sprintf('h4cc_alice_fixtures.%s_manager', $input->getOption('manager'));
         }
 
