@@ -128,7 +128,7 @@ Example:
 
 ```php
 $files = array(__DIR__.'/fixtures/Users.yml', __DIR__.'/fixtures/Articles.yml');
-// Or use $manager = $this->get('h4cc_alice_fixtures.[my-manager-name]_manager'); to used and other manager.
+// Or use $manager = $this->get('h4cc_alice_fixtures.[my_manager_name]_manager'); to use an other manager.
 $manager = $this->get('h4cc_alice_fixtures.manager');
 
 // Step 1, load entities.
