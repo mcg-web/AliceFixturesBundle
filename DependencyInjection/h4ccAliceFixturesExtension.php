@@ -100,7 +100,7 @@ class h4ccAliceFixturesExtension extends Extension
         );
     }
 
-    private function getObjectManagerServiceIdForCurrentConfig(array $currentManagerConfig, ContainerBuilder $container)
+    private function getObjectManagerServiceIdForCurrentConfig(array $currentManagerConfig)
     {
         if(!empty($currentManagerConfig['object_manager'])) {
             $serviceId = $currentManagerConfig['object_manager'];
